@@ -1,4 +1,4 @@
-# LawAdvisorRyanTest
+# LawAdvisorTest
 
 To start your Phoenix server:
 

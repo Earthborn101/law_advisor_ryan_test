@@ -1,4 +1,4 @@
-defmodule LawAdvisorRyanTest.DataCase do
+defmodule LawAdvisorTest.DataCase do
   @moduledoc """
   This module defines the setup for tests requiring
   access to the application's data layer.
@@ -10,7 +10,7 @@ defmodule LawAdvisorRyanTest.DataCase do
   we enable the SQL sandbox, so changes done to the database
   are reverted at the end of every test. If you are using
   PostgreSQL, you can even run database tests asynchronously
-  by setting `use LawAdvisorRyanTest.DataCase, async: true`, although
+  by setting `use LawAdvisorTest.DataCase, async: true`, although
   this option is not recommended for other databases.
   """
 
@@ -18,17 +18,17 @@ defmodule LawAdvisorRyanTest.DataCase do
 
   using do
     quote do
-      alias LawAdvisorRyanTest.Repo
+      alias LawAdvisorTest.Repo
 
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
-      import LawAdvisorRyanTest.DataCase
+      import LawAdvisorTest.DataCase
     end
   end
 
   setup tags do
-    LawAdvisorRyanTest.DataCase.setup_sandbox(tags)
+    LawAdvisorTest.DataCase.setup_sandbox(tags)
     :ok
   end
 
@@ -36,7 +36,7 @@ defmodule LawAdvisorRyanTest.DataCase do
   Sets up the sandbox based on the test tags.
   """
   def setup_sandbox(tags) do
-    pid = Ecto.Adapters.SQL.Sandbox.start_owner!(LawAdvisorRyanTest.Repo, shared: not tags[:async])
+    pid = Ecto.Adapters.SQL.Sandbox.start_owner!(LawAdvisorTest.Repo, shared: not tags[:async])
     on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
   end
 

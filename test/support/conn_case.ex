@@ -1,4 +1,4 @@
-defmodule LawAdvisorRyanTestWeb.ConnCase do
+defmodule LawAdvisorTestWeb.ConnCase do
   @moduledoc """
   This module defines the test case to be used by
   tests that require setting up a connection.
@@ -11,7 +11,7 @@ defmodule LawAdvisorRyanTestWeb.ConnCase do
   we enable the SQL sandbox, so changes done to the database
   are reverted at the end of every test. If you are using
   PostgreSQL, you can even run database tests asynchronously
-  by setting `use LawAdvisorRyanTestWeb.ConnCase, async: true`, although
+  by setting `use LawAdvisorTestWeb.ConnCase, async: true`, although
   this option is not recommended for other databases.
   """
 
@@ -20,19 +20,19 @@ defmodule LawAdvisorRyanTestWeb.ConnCase do
   using do
     quote do
       # The default endpoint for testing
-      @endpoint LawAdvisorRyanTestWeb.Endpoint
+      @endpoint LawAdvisorTestWeb.Endpoint
 
-      use LawAdvisorRyanTestWeb, :verified_routes
+      use LawAdvisorTestWeb, :verified_routes
 
       # Import conveniences for testing with connections
       import Plug.Conn
       import Phoenix.ConnTest
-      import LawAdvisorRyanTestWeb.ConnCase
+      import LawAdvisorTestWeb.ConnCase
     end
   end
 
   setup tags do
-    LawAdvisorRyanTest.DataCase.setup_sandbox(tags)
+    LawAdvisorTest.DataCase.setup_sandbox(tags)
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 end

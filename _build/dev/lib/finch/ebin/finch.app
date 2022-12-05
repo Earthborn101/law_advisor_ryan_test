@@ -11,4 +11,4 @@
                         'Elixir.Finch.Response','Elixir.Finch.SSL',
                         'Elixir.Finch.Telemetry']},
               {registered,[]},
-              {vsn,"0.13.0"}]}.
+              {vsn,"0.14.0"}]}.

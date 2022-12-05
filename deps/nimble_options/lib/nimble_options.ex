@@ -15,12 +15,16 @@ defmodule NimbleOptions do
         ],
         default: [
           type: :any,
-          doc: "The default value for option item if not specified."
+          doc: """
+          The default value for the option item if that option is not specified. This value
+          is *validated* according to the given `:type`. This means that you cannot
+          have, for example, `type: :integer` and use `default: "a string"`.
+          """
         ],
         keys: [
           type: :keyword_list,
           doc: """
-          Available for types `:keyword_list` and `:non_empty_keyword_list`,
+          Available for types `:keyword_list`, `:non_empty_keyword_list`, and `:map`,
           it defines which set of keys are accepted for the option item. The value of the
           `:keys` option is a schema itself. For example: `keys: [foo: [type: :atom]]`.
           Use `:*` as the key to allow multiple arbitrary keys and specify their schema:
@@ -42,6 +46,20 @@ defmodule NimbleOptions do
         subsection: [
           type: :string,
           doc: "The title of separate subsection of the options' documentation"
+        ],
+        type_doc: [
+          type: {:or, [:string, {:in, false}]},
+          doc: """
+          The type doc to use *in the documentation* for the option item. If `false`,
+          no type documentation is added to the item. If it's a string, it can be
+          anything. For example, you can use `"a list of PIDs"`, or you can use
+          a typespec reference that ExDoc can link to the type definition, such as
+          `` "`t:binary/0`" ``. You can use Markdown in this documentation. If the
+          `:type_doc` option is not present, NimbleOptions tries to produce a type
+          documentation automatically if it can do it unambiguously. For example,
+          if `type: :integer`, NimbleOptions will use `t:integer/0` as the
+          auto-generated type doc.
+          """
         ],
         # TODO: remove in v0.5.
         rename_to: [
@@ -78,6 +96,12 @@ defmodule NimbleOptions do
 
     * `:non_empty_keyword_list` - A non-empty keyword list.
 
+    * `:map` - A map consisting of `:atom` keys. Shorthand for `{:map, :atom, :any}`.
+      Keys can be specified using the `keys` option.
+
+    * `{:map, key_type, value_type}` - A map consisting of `key_type` keys and
+      `value_type` values.
+
     * `:atom` - An atom.
 
     * `:string` - A string.
@@ -95,6 +119,8 @@ defmodule NimbleOptions do
     * `:timeout` - A non-negative integer or the atom `:infinity`.
 
     * `:pid` - A PID (process identifier).
+
+    * `:reference` - A reference (see `t:reference/0`).
 
     * `:mfa` - A named function in the format `{module, function, arity}` where
       `arity` is a list of arguments. For example, `{MyModule, :my_fun, [arg1, arg2]}`.
@@ -118,9 +144,9 @@ defmodule NimbleOptions do
       matched against the subtypes in the order specified in the list of `subtypes`. If
       one of the subtypes matches and **updates** (casts) the given value, the updated
       value is used. For example: `{:or, [:string, :boolean, {:fun, 2}]}`. If one of the
-      subtypes is a keyword list, you won't be able to pass `:keys` directly. For this reason,
-      keyword lists (`:keyword_list` and `:non_empty_keyword_list`) are special cased and can
-      be used as subtypes with `{:keyword_list, keys}` or `{:non_empty_keyword_list, keys}`.
+      subtypes is a keyword list or map, you won't be able to pass `:keys` directly. For this reason,
+      `:keyword_list`, `:non_empty_keyword_list`, and `:map` are special cased and can
+      be used as subtypes with `{:keyword_list, keys}`, `{:non_empty_keyword_list, keys}` or `{:map, keys}`.
       For example, a type such as `{:or, [:boolean, keyword_list: [enabled: [type: :boolean]]]}`
       would match either a boolean or a keyword list with the `:enabled` boolean option in it.
 
@@ -129,7 +155,20 @@ defmodule NimbleOptions do
       contains the validated (and possibly updated) elements, each as returned after validation
       through `subtype`. For example, if `subtype` is a custom validator function that returns
       an updated value, then that updated value is used in the resulting list. Validation
-      fails at the *first* element that is invalid according to `subtype`.
+      fails at the *first* element that is invalid according to `subtype`. If `subtype` is
+      a keyword list or map, you won't be able to pass `:keys` directly. For this reason,
+      `:keyword_list`, `:non_empty_keyword_list`, and `:map` are special cased and can
+      be used as the subtype by using `{:keyword_list, keys}`, `{:non_empty_keyword_list, keys}`
+      or `{:keyword_list, keys}`. For example, a type such as
+      `{:list, {:keyword_list, enabled: [type: :boolean]}}` would a *list of keyword lists*,
+      where each keyword list in the list could have the `:enabled` boolean option in it.
+
+    * `{:tuple, list_of_subtypes}` - A tuple as described by `tuple_of_subtypes`.
+      `list_of_subtypes` must be a list with the same length as the expected tuple.
+      Each of the list's elements must be a subtype that should match the given element in that
+      same position. For example, to describe 3-element tuples with an atom, a string, and
+      a list of integers you would use the type `{:tuple, [:atom, :string, {:list, :integer}]}`.
+      *Available since v0.4.1*.
 
   ## Example
 
@@ -154,7 +193,7 @@ defmodule NimbleOptions do
       ...>
       ...> {:error, %NimbleOptions.ValidationError{} = error} = NimbleOptions.validate(config, schema)
       ...> Exception.message(error)
-      "required option :module not found, received options: [:concurrency] (in options [:producer])"
+      "required :module option not found, received options: [:concurrency] (in options [:producer])"
 
   ## Nested option items
 
@@ -188,7 +227,7 @@ defmodule NimbleOptions do
       ...>
       ...> {:error, %NimbleOptions.ValidationError{} = error} = NimbleOptions.validate(config, schema)
       ...> Exception.message(error)
-      "expected :interval to be a positive integer, got: :oops! (in options [:producer, :rate_limiting])"
+      "invalid value for :interval option: expected positive integer, got: :oops! (in options [:producer, :rate_limiting])"
 
   ## Validating Schemas
 
@@ -232,6 +271,7 @@ defmodule NimbleOptions do
     :any,
     :keyword_list,
     :non_empty_keyword_list,
+    :map,
     :atom,
     :integer,
     :non_neg_integer,
@@ -242,7 +282,8 @@ defmodule NimbleOptions do
     :string,
     :boolean,
     :timeout,
-    :pid
+    :pid,
+    :reference
   ]
 
   @typedoc """
@@ -305,8 +346,7 @@ defmodule NimbleOptions do
 
       {:error, %ValidationError{} = error} ->
         raise ArgumentError,
-              "invalid schema given to NimbleOptions.validate/2. " <>
-                "Reason: #{Exception.message(error)}"
+              "invalid NimbleOptions schema. Reason: #{Exception.message(error)}"
     end
   end
 
@@ -346,7 +386,7 @@ defmodule NimbleOptions do
           ]
 
   """
-  @spec docs(schema(), keyword() | t()) :: String.t()
+  @spec docs(schema() | t(), keyword()) :: String.t()
   def docs(schema, options \\ [])
 
   def docs(schema, options) when is_list(schema) and is_list(options) do
@@ -355,6 +395,61 @@ defmodule NimbleOptions do
 
   def docs(%NimbleOptions{schema: schema}, options) when is_list(options) do
     NimbleOptions.Docs.generate(schema, options)
+  end
+
+  @doc """
+  Returns the quoted typespec for any option described by the given schema.
+
+  The returned quoted code represents the **type union** for all possible
+  keys in the schema, alongside their type. Nested keyword lists are
+  spec'ed as `t:keyword/0`.
+
+  ## Usage
+
+  Because of how typespecs are treated by the Elixir compiler, you have
+  to use `unquote/1` on the return value of this function to use it
+  in a typespec:
+
+      @type option() :: unquote(NimbleOptions.option_typespec(my_schema))
+
+  This function returns the type union for a single option: to give you
+  flexibility to combine it and use it in your own typespecs. For example,
+  if you only validate part of the options through NimbleOptions, you could
+  write a spec like this:
+
+      @type my_option() ::
+              {:my_opt1, integer()}
+              | {:my_opt2, boolean()}
+              | unquote(NimbleOptions.option_typespec(my_schema))
+
+  If you want to spec a whole schema, you could write something like this:
+
+      @type options() :: [unquote(NimbleOptions.option_typespec(my_schema))]
+
+  ## Example
+
+      schema = [
+        int: [type: :integer],
+        number: [type: {:or, [:integer, :float]}]
+      ]
+
+      @type option() :: unquote(NimbleOptions.option_typespec(schema))
+
+  The code above would essentially compile to:
+
+      @type option() :: {:int, integer()} | {:number, integer() | float()}
+
+  """
+  @doc since: "0.5.0"
+  @spec option_typespec(schema() | t()) :: Macro.t()
+  def option_typespec(schema)
+
+  def option_typespec(schema) when is_list(schema) do
+    NimbleOptions.Docs.schema_to_spec(schema)
+  end
+
+  def option_typespec(%NimbleOptions{schema: schema}) do
+    NimbleOptions.Docs.schema_to_spec(schema)
   end
 
   @doc false
@@ -370,7 +465,16 @@ defmodule NimbleOptions do
     validate_options_with_schema_and_path(opts, fun.(), path)
   end
 
-  defp validate_options_with_schema_and_path(opts, schema, path) do
+  defp validate_options_with_schema_and_path(opts, schema, path) when is_map(opts) do
+    list_opts = Map.to_list(opts)
+
+    case validate_options_with_schema_and_path(list_opts, schema, path) do
+      {:ok, validated_list_opts} -> {:ok, Map.new(validated_list_opts)}
+      error -> error
+    end
+  end
+
+  defp validate_options_with_schema_and_path(opts, schema, path) when is_list(opts) do
     schema = expand_star_to_option_keys(schema, opts)
 
     with :ok <- validate_unknown_options(opts, schema),
@@ -448,7 +552,7 @@ defmodule NimbleOptions do
     cond do
       Keyword.has_key?(opts, key) ->
         if message = Keyword.get(schema, :deprecated) do
-          IO.warn("#{inspect(key)} is deprecated. " <> message)
+          IO.warn("#{render_key(key)} is deprecated. " <> message)
         end
 
         {:ok, opts[key]}
@@ -457,7 +561,7 @@ defmodule NimbleOptions do
         error_tuple(
           key,
           nil,
-          "required option #{inspect(key)} not found, received options: " <>
+          "required #{render_key(key)} not found, received options: " <>
             inspect(Keyword.keys(opts))
         )
 
@@ -467,14 +571,18 @@ defmodule NimbleOptions do
   end
 
   defp validate_type(:integer, key, value) when not is_integer(value) do
-    error_tuple(key, value, "expected #{inspect(key)} to be an integer, got: #{inspect(value)}")
+    error_tuple(
+      key,
+      value,
+      "invalid value for #{render_key(key)}: expected integer, got: #{inspect(value)}"
+    )
   end
 
   defp validate_type(:non_neg_integer, key, value) when not is_integer(value) or value < 0 do
     error_tuple(
       key,
       value,
-      "expected #{inspect(key)} to be a non negative integer, got: #{inspect(value)}"
+      "invalid value for #{render_key(key)}: expected non negative integer, got: #{inspect(value)}"
     )
   end
 
@@ -482,16 +590,24 @@ defmodule NimbleOptions do
     error_tuple(
       key,
       value,
-      "expected #{inspect(key)} to be a positive integer, got: #{inspect(value)}"
+      "invalid value for #{render_key(key)}: expected positive integer, got: #{inspect(value)}"
     )
   end
 
   defp validate_type(:float, key, value) when not is_float(value) do
-    error_tuple(key, value, "expected #{inspect(key)} to be a float, got: #{inspect(value)}")
+    error_tuple(
+      key,
+      value,
+      "invalid value for #{render_key(key)}: expected float, got: #{inspect(value)}"
+    )
   end
 
   defp validate_type(:atom, key, value) when not is_atom(value) do
-    error_tuple(key, value, "expected #{inspect(key)} to be an atom, got: #{inspect(value)}")
+    error_tuple(
+      key,
+      value,
+      "invalid value for #{render_key(key)}: expected atom, got: #{inspect(value)}"
+    )
   end
 
   defp validate_type(:timeout, key, value)
@@ -499,16 +615,24 @@ defmodule NimbleOptions do
     error_tuple(
       key,
       value,
-      "expected #{inspect(key)} to be non-negative integer or :infinity, got: #{inspect(value)}"
+      "invalid value for #{render_key(key)}: expected non-negative integer or :infinity, got: #{inspect(value)}"
     )
   end
 
   defp validate_type(:string, key, value) when not is_binary(value) do
-    error_tuple(key, value, "expected #{inspect(key)} to be a string, got: #{inspect(value)}")
+    error_tuple(
+      key,
+      value,
+      "invalid value for #{render_key(key)}: expected string, got: #{inspect(value)}"
+    )
   end
 
   defp validate_type(:boolean, key, value) when not is_boolean(value) do
-    error_tuple(key, value, "expected #{inspect(key)} to be a boolean, got: #{inspect(value)}")
+    error_tuple(
+      key,
+      value,
+      "invalid value for #{render_key(key)}: expected boolean, got: #{inspect(value)}"
+    )
   end
 
   defp validate_type(:keyword_list, key, value) do
@@ -518,7 +642,7 @@ defmodule NimbleOptions do
       error_tuple(
         key,
         value,
-        "expected #{inspect(key)} to be a keyword list, got: #{inspect(value)}"
+        "invalid value for #{render_key(key)}: expected keyword list, got: #{inspect(value)}"
       )
     end
   end
@@ -530,9 +654,40 @@ defmodule NimbleOptions do
       error_tuple(
         key,
         value,
-        "expected #{inspect(key)} to be a non-empty keyword list, got: #{inspect(value)}"
+        "invalid value for #{render_key(key)}: expected non-empty keyword list, got: #{inspect(value)}"
       )
     end
+  end
+
+  defp validate_type(:map, key, value) do
+    validate_type({:map, :atom, :any}, key, value)
+  end
+
+  defp validate_type({:map, key_type, value_type}, key, map) when is_map(map) do
+    map
+    |> Enum.reduce_while([], fn {key, value}, acc ->
+      with {:ok, updated_key} <- validate_type(key_type, {__MODULE__, :key}, key),
+           {:ok, updated_value} <- validate_type(value_type, {__MODULE__, :value, key}, value) do
+        {:cont, [{updated_key, updated_value} | acc]}
+      else
+        {:error, %ValidationError{} = error} -> {:halt, error}
+      end
+    end)
+    |> case do
+      pairs when is_list(pairs) ->
+        {:ok, Map.new(pairs)}
+
+      %ValidationError{} = error ->
+        error_tuple(key, map, "invalid map in #{render_key(key)}: #{error.message}")
+    end
+  end
+
+  defp validate_type({:map, _, _}, key, value) do
+    error_tuple(
+      key,
+      value,
+      "invalid value for #{render_key(key)}: expected map, got: #{inspect(value)}"
+    )
   end
 
   defp validate_type(:pid, _key, value) when is_pid(value) do
@@ -540,7 +695,23 @@ defmodule NimbleOptions do
   end
 
   defp validate_type(:pid, key, value) do
-    error_tuple(key, value, "expected #{inspect(key)} to be a pid, got: #{inspect(value)}")
+    error_tuple(
+      key,
+      value,
+      "invalid value for #{render_key(key)}: expected pid, got: #{inspect(value)}"
+    )
+  end
+
+  defp validate_type(:reference, _key, value) when is_reference(value) do
+    {:ok, value}
+  end
+
+  defp validate_type(:reference, key, value) do
+    error_tuple(
+      key,
+      value,
+      "invalid value for #{render_key(key)}: expected reference, got: #{inspect(value)}"
+    )
   end
 
   defp validate_type(:mfa, _key, {mod, fun, args} = value)
@@ -552,7 +723,7 @@ defmodule NimbleOptions do
     error_tuple(
       key,
       value,
-      "expected #{inspect(key)} to be a tuple {Mod, Fun, Args}, got: #{inspect(value)}"
+      "invalid value for #{render_key(key)}: expected tuple {mod, fun, args}, got: #{inspect(value)}"
     )
   end
 
@@ -564,23 +735,29 @@ defmodule NimbleOptions do
     error_tuple(
       key,
       value,
-      "expected #{inspect(key)} to be a tuple {Mod, Arg}, got: #{inspect(value)}"
+      "invalid value for #{render_key(key)}: expected tuple {mod, arg}, got: #{inspect(value)}"
     )
   end
 
   defp validate_type({:fun, arity}, key, value) do
-    expected = "expected #{inspect(key)} to be a function of arity #{arity}, "
-
     if is_function(value) do
       case :erlang.fun_info(value, :arity) do
         {:arity, ^arity} ->
           {:ok, value}
 
         {:arity, fun_arity} ->
-          error_tuple(key, value, expected <> "got: function of arity #{inspect(fun_arity)}")
+          error_tuple(
+            key,
+            value,
+            "invalid value for #{render_key(key)}: expected function of arity #{arity}, got: function of arity #{inspect(fun_arity)}"
+          )
       end
     else
-      error_tuple(key, value, expected <> "got: #{inspect(value)}")
+      error_tuple(
+        key,
+        value,
+        "invalid value for #{render_key(key)}: expected function of arity #{arity}, got: #{inspect(value)}"
+      )
     end
   end
 
@@ -590,7 +767,7 @@ defmodule NimbleOptions do
         {:ok, value}
 
       {:error, message} when is_binary(message) ->
-        error_tuple(key, value, message)
+        error_tuple(key, value, "invalid value for #{render_key(key)}: " <> message)
 
       other ->
         raise "custom validation function #{inspect(mod)}.#{fun}/#{length(args) + 1} " <>
@@ -605,7 +782,7 @@ defmodule NimbleOptions do
       error_tuple(
         key,
         value,
-        "expected #{inspect(key)} to be in #{inspect(choices)}, got: #{inspect(value)}"
+        "invalid value for #{render_key(key)}: expected one of #{inspect(choices)}, got: #{inspect(value)}"
       )
     end
   end
@@ -615,8 +792,8 @@ defmodule NimbleOptions do
       Enum.reduce_while(subtypes, _errors = [], fn subtype, errors_acc ->
         {subtype, nested_schema} =
           case subtype do
-            {keyword_list, keys} when keyword_list in [:keyword_list, :non_empty_keyword_list] ->
-              {keyword_list, keys}
+            {type, keys} when type in [:keyword_list, :non_empty_keyword_list, :map] ->
+              {type, keys}
 
             other ->
               {other, _nested_schema = nil}
@@ -643,7 +820,7 @@ defmodule NimbleOptions do
 
       errors when is_list(errors) ->
         message =
-          "expected #{inspect(key)} to match at least one given type, but didn't match " <>
+          "expected #{render_key(key)} to match at least one given type, but didn't match " <>
             "any. Here are the reasons why it didn't match each of the allowed types:\n\n" <>
             Enum.map_join(errors, "\n", &("  * " <> Exception.message(&1)))
 
@@ -652,28 +829,88 @@ defmodule NimbleOptions do
   end
 
   defp validate_type({:list, subtype}, key, value) when is_list(value) do
+    {subtype, nested_schema} =
+      case subtype do
+        {type, keys} when type in [:keyword_list, :non_empty_keyword_list, :map] ->
+          {type, keys}
+
+        other ->
+          {other, _nested_schema = nil}
+      end
+
     updated_elements =
       for {elem, index} <- Stream.with_index(value) do
-        case validate_type(subtype, "list element", elem) do
+        case validate_type(subtype, {__MODULE__, :list, index}, elem) do
+          {:ok, value} when not is_nil(nested_schema) ->
+            case validate_options_with_schema_and_path(value, nested_schema, _path = [key]) do
+              {:ok, updated_value} -> updated_value
+              {:error, %ValidationError{} = error} -> throw({:error, index, error})
+            end
+
           {:ok, updated_elem} ->
             updated_elem
 
           {:error, %ValidationError{} = error} ->
-            throw({:error, index, error})
+            throw({:error, error})
         end
       end
 
     {:ok, updated_elements}
   catch
-    {:error, index, %ValidationError{} = error} ->
-      message =
-        "list element at position #{index} in #{inspect(key)} failed validation: #{error.message}"
+    {:error, %ValidationError{} = error} ->
+      error_tuple(key, value, "invalid list in #{render_key(key)}: #{error.message}")
 
-      error_tuple(key, value, message)
+    {:error, index, %ValidationError{} = error} ->
+      error_tuple(
+        key,
+        value,
+        "invalid list element at position #{index} in #{render_key(key)}: #{error.message}"
+      )
   end
 
   defp validate_type({:list, _subtype}, key, value) do
-    error_tuple(key, value, "expected #{inspect(key)} to be a list, got: #{inspect(value)}")
+    error_tuple(
+      key,
+      value,
+      "invalid value for #{render_key(key)}: expected list, got: #{inspect(value)}"
+    )
+  end
+
+  defp validate_type({:tuple, tuple_def}, key, value)
+       when is_tuple(value) and length(tuple_def) == tuple_size(value) do
+    tuple_def
+    |> Stream.with_index()
+    |> Enum.reduce_while([], fn {subtype, index}, acc ->
+      elem = elem(value, index)
+
+      case validate_type(subtype, {__MODULE__, :tuple, index}, elem) do
+        {:ok, updated_elem} -> {:cont, [updated_elem | acc]}
+        {:error, %ValidationError{} = error} -> {:halt, error}
+      end
+    end)
+    |> case do
+      acc when is_list(acc) ->
+        {:ok, acc |> Enum.reverse() |> List.to_tuple()}
+
+      %ValidationError{} = error ->
+        error_tuple(key, value, "invalid tuple in #{render_key(key)}: #{error.message}")
+    end
+  end
+
+  defp validate_type({:tuple, tuple_def}, key, value) when is_tuple(value) do
+    error_tuple(
+      key,
+      value,
+      "invalid value for #{render_key(key)}: expected tuple with #{length(tuple_def)} elements, got: #{inspect(value)}"
+    )
+  end
+
+  defp validate_type({:tuple, _tuple_def}, key, value) do
+    error_tuple(
+      key,
+      value,
+      "invalid value for #{render_key(key)}: expected tuple, got: #{inspect(value)}"
+    )
   end
 
   defp validate_type(nil, key, value) do
@@ -706,7 +943,9 @@ defmodule NimbleOptions do
           "{:in, choices}",
           "{:or, subtypes}",
           "{:custom, mod, fun, args}",
-          "{:list, subtype}"
+          "{:list, subtype}",
+          "{:tuple, list_of_subtypes}",
+          "{:map, key_type, value_type}"
         ]
 
     Enum.join(types, ", ")
@@ -733,30 +972,75 @@ defmodule NimbleOptions do
 
   def validate_type({:or, subtypes} = value) when is_list(subtypes) do
     Enum.reduce_while(subtypes, {:ok, value}, fn
-      {keyword_list_type, _keys}, acc
-      when keyword_list_type in [:keyword_list, :non_empty_keyword_list] ->
+      {type, _keys}, acc
+      when type in [:keyword_list, :non_empty_keyword_list, :map] ->
         {:cont, acc}
 
       subtype, acc ->
         case validate_type(subtype) do
           {:ok, _value} -> {:cont, acc}
-          {:error, reason} -> {:halt, {:error, "invalid type in :or for reason: #{reason}"}}
+          {:error, reason} -> {:halt, {:error, "invalid type given to :or type: #{reason}"}}
         end
     end)
+  end
+
+  # This is to support the special-cased "{:list, {:keyword_list, my_key: [type: ...]}}",
+  # like we do in the :or type.
+  def validate_type({:list, {type, keys}})
+      when type in [:keyword_list, :non_empty_keyword_list, :map] and is_list(keys) do
+    {:ok, {:list, {type, keys}}}
   end
 
   def validate_type({:list, subtype}) do
     case validate_type(subtype) do
       {:ok, validated_subtype} -> {:ok, {:list, validated_subtype}}
-      {:error, reason} -> {:error, "invalid subtype for :list type: #{reason}"}
+      {:error, reason} -> {:error, "invalid subtype given to :list type: #{reason}"}
     end
   end
 
+  def validate_type({:tuple, tuple_def}) when is_list(tuple_def) do
+    validated_def =
+      Enum.map(tuple_def, fn subtype ->
+        case validate_type(subtype) do
+          {:ok, validated_subtype} -> validated_subtype
+          {:error, reason} -> throw({:error, "invalid subtype given to :tuple type: #{reason}"})
+        end
+      end)
+
+    {:ok, {:tuple, validated_def}}
+  catch
+    {:error, reason} -> {:error, reason}
+  end
+
+  def validate_type({:map, key_type, value_type}) do
+    valid_key_type =
+      case validate_type(key_type) do
+        {:ok, validated_key_type} -> validated_key_type
+        {:error, reason} -> throw({:error, "invalid key_type for :map type: #{reason}"})
+      end
+
+    valid_values_type =
+      case validate_type(value_type) do
+        {:ok, validated_values_type} -> validated_values_type
+        {:error, reason} -> throw({:error, "invalid value_type for :map type: #{reason}"})
+      end
+
+    {:ok, {:map, valid_key_type, valid_values_type}}
+  catch
+    {:error, reason} -> {:error, reason}
+  end
+
   def validate_type(value) do
-    {:error, "invalid option type #{inspect(value)}.\n\nAvailable types: #{available_types()}"}
+    {:error, "unknown type #{inspect(value)}.\n\nAvailable types: #{available_types()}"}
   end
 
   defp error_tuple(key, value, message) do
     {:error, %ValidationError{key: key, message: message, value: value}}
   end
+
+  defp render_key({__MODULE__, :key}), do: "map key"
+  defp render_key({__MODULE__, :value, key}), do: "map key #{inspect(key)}"
+  defp render_key({__MODULE__, :tuple, index}), do: "tuple element at position #{index}"
+  defp render_key({__MODULE__, :list, index}), do: "list element at position #{index}"
+  defp render_key(key), do: inspect(key) <> " option"
 end

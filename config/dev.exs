@@ -1,11 +1,11 @@
 import Config
 
 # Configure your database
-config :law_advisor_ryan_test, LawAdvisorRyanTest.Repo,
+config :law_advisor_test, LawAdvisorTest.Repo,
   username: "postgres",
   password: "postgres",
   hostname: "localhost",
-  database: "law_advisor_ryan_test_dev",
+  database: "law_advisor_test_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
@@ -16,14 +16,14 @@ config :law_advisor_ryan_test, LawAdvisorRyanTest.Repo,
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we use it
 # with esbuild to bundle .js and .css sources.
-config :law_advisor_ryan_test, LawAdvisorRyanTestWeb.Endpoint,
+config :law_advisor_test, LawAdvisorTestWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
   http: [ip: {127, 0, 0, 1}, port: 4000],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
-  secret_key_base: "BbeRPSe8MZU8eR9zUKDW8telhWwV02M0pJWXpdoPNrj5/uvlmLkGEXelTU8BV2Y1",
+  secret_key_base: "eMKJnmpNbXnKcKoWCOC4i/pkgGiQIKIiJ7yPpqKZAx/wFTDk/qUYHmveRuoIcFqm",
   watchers: [
     esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},
     tailwind: {Tailwind, :install_and_run, [:default, ~w(--watch)]}
@@ -53,18 +53,18 @@ config :law_advisor_ryan_test, LawAdvisorRyanTestWeb.Endpoint,
 # different ports.
 
 # Watch static and templates for browser reloading.
-config :law_advisor_ryan_test, LawAdvisorRyanTestWeb.Endpoint,
+config :law_advisor_test, LawAdvisorTestWeb.Endpoint,
   live_reload: [
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/law_advisor_ryan_test_web/(live|views)/.*(ex)$",
-      ~r"lib/law_advisor_ryan_test_web/templates/.*(eex)$"
+      ~r"lib/law_advisor_test_web/(live|views)/.*(ex)$",
+      ~r"lib/law_advisor_test_web/templates/.*(eex)$"
     ]
   ]
 
 # Enable dev routes for dashboard and mailbox
-config :law_advisor_ryan_test, dev_routes: true
+config :law_advisor_test, dev_routes: true
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"

@@ -7,18 +7,18 @@
 # General application configuration
 import Config
 
-config :law_advisor_ryan_test,
-  ecto_repos: [LawAdvisorRyanTest.Repo]
+config :law_advisor_test,
+  ecto_repos: [LawAdvisorTest.Repo]
 
 # Configures the endpoint
-config :law_advisor_ryan_test, LawAdvisorRyanTestWeb.Endpoint,
+config :law_advisor_test, LawAdvisorTestWeb.Endpoint,
   url: [host: "localhost"],
   render_errors: [
-    formats: [html: LawAdvisorRyanTestWeb.ErrorHTML, json: LawAdvisorRyanTestWeb.ErrorJSON],
+    formats: [html: LawAdvisorTestWeb.ErrorHTML, json: LawAdvisorTestWeb.ErrorJSON],
     layout: false
   ],
-  pubsub_server: LawAdvisorRyanTest.PubSub,
-  live_view: [signing_salt: "e3Z4MT1t"]
+  pubsub_server: LawAdvisorTest.PubSub,
+  live_view: [signing_salt: "+fN1GyaJ"]
 
 # Configures the mailer
 #
@@ -27,7 +27,7 @@ config :law_advisor_ryan_test, LawAdvisorRyanTestWeb.Endpoint,
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
-config :law_advisor_ryan_test, LawAdvisorRyanTest.Mailer, adapter: Swoosh.Adapters.Local
+config :law_advisor_test, LawAdvisorTest.Mailer, adapter: Swoosh.Adapters.Local
 
 # Configure esbuild (the version is required)
 config :esbuild,

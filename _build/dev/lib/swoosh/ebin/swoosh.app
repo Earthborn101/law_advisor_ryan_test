@@ -43,7 +43,7 @@
                         'Elixir.Swoosh.Email.Render','Elixir.Swoosh.Mailer',
                         'Elixir.Swoosh.TestAssertions']},
               {registered,[]},
-              {vsn,"1.8.2"},
+              {vsn,"1.8.3"},
               {mod,{'Elixir.Swoosh.Application',[]}},
               {env,[{json_library,'Elixir.Jason'},
                     {api_client,'Elixir.Swoosh.ApiClient.Hackney'}]}]}.

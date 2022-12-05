@@ -1,9 +1,9 @@
-defmodule LawAdvisorRyanTest.MixProject do
+defmodule LawAdvisorTest.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :law_advisor_ryan_test,
+      app: :law_advisor_test,
       version: "0.1.0",
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -18,7 +18,7 @@ defmodule LawAdvisorRyanTest.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {LawAdvisorRyanTest.Application, []},
+      mod: {LawAdvisorTest.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end
@@ -32,28 +32,25 @@ defmodule LawAdvisorRyanTest.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
-      {:ecto_sql, "~> 3.6"},
-      {:esbuild, "~> 0.5", runtime: Mix.env() == :dev},
-      {:finch, "~> 0.13"},
-      {:floki, ">= 0.30.0", only: :test},
-      {:gettext, "~> 0.20"},
-      {:heroicons, "~> 0.5"},
-      {:jason, "~> 1.2"},
+      {:phoenix, "~> 1.7.0-rc.0", override: true},
       {:phoenix_ecto, "~> 4.4"},
+      {:ecto_sql, "~> 3.6"},
+      {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 3.0"},
-      {:phoenix_live_dashboard, "~> 0.7.2"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_view, "~> 0.18.3"},
-      {:phoenix, "~> 1.7.0-rc.0", override: true},
-      {:plug_cowboy, "~> 2.5"},
-      {:postgrex, ">= 0.0.0"},
-      {:swoosh, "~> 1.3"},
+      {:heroicons, "~> 0.5"},
+      {:floki, ">= 0.30.0", only: :test},
+      {:phoenix_live_dashboard, "~> 0.7.2"},
+      {:esbuild, "~> 0.5", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.1.8", runtime: Mix.env() == :dev},
+      {:swoosh, "~> 1.3"},
+      {:finch, "~> 0.13"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
-      {:makeup, "~> 1.1"},
-      {:makeup_elixir, "~> 0.14.0"}
+      {:gettext, "~> 0.20"},
+      {:jason, "~> 1.2"},
+      {:plug_cowboy, "~> 2.5"}
     ]
   end
 

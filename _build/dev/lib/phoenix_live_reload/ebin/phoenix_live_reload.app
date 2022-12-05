@@ -6,5 +6,5 @@
                         'Elixir.Phoenix.LiveReloader.Channel',
                         'Elixir.Phoenix.LiveReloader.Socket']},
               {registered,[]},
-              {vsn,"1.4.0"},
+              {vsn,"1.4.1"},
               {mod,{'Elixir.Phoenix.LiveReloader.Application',[]}}]}.

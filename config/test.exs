@@ -5,23 +5,23 @@ import Config
 # The MIX_TEST_PARTITION environment variable can be used
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
-config :law_advisor_ryan_test, LawAdvisorRyanTest.Repo,
+config :law_advisor_test, LawAdvisorTest.Repo,
   username: "postgres",
   password: "postgres",
   hostname: "localhost",
-  database: "law_advisor_ryan_test_test#{System.get_env("MIX_TEST_PARTITION")}",
+  database: "law_advisor_test_test#{System.get_env("MIX_TEST_PARTITION")}",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: 10
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
-config :law_advisor_ryan_test, LawAdvisorRyanTestWeb.Endpoint,
+config :law_advisor_test, LawAdvisorTestWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
-  secret_key_base: "7wN+2usIHJPwJ6/Dc7dBBXTY0VPIOFWq49+bl6/OHSIOUdTQSwr3Z+fkIchlUuN4",
+  secret_key_base: "L4eG9UYK889XWxOAEhZgMYLPKgOvwtQKB0o+vRjS3dgQ6nj75qg2ab1Mhp0CCBgh",
   server: false
 
 # In test we don't send emails.
-config :law_advisor_ryan_test, LawAdvisorRyanTest.Mailer, adapter: Swoosh.Adapters.Test
+config :law_advisor_test, LawAdvisorTest.Mailer, adapter: Swoosh.Adapters.Test
 
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false

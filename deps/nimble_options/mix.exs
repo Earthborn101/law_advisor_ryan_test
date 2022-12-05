@@ -1,14 +1,14 @@
 defmodule NimbleOptions.MixProject do
   use Mix.Project
 
-  @version "0.4.0"
+  @version "0.5.1"
   @repo_url "https://github.com/dashbitco/nimble_options"
 
   def project do
     [
       app: :nimble_options,
       version: @version,
-      elixir: "~> 1.6",
+      elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
 
@@ -36,14 +36,14 @@ defmodule NimbleOptions.MixProject do
   defp deps do
     [
       {:ex_doc, ">= 0.19.0", only: :dev},
-      {:excoveralls, "~> 0.13.3", only: :test}
+      {:excoveralls, "~> 0.14.5", only: :test}
     ]
   end
 
   defp package do
     [
       maintainers: ["Andrea Leopardi", "José Valim", "Marlus Saraiva"],
-      licenses: ["Apache 2.0"],
+      licenses: ["Apache-2.0"],
       links: %{"GitHub" => @repo_url}
     ]
   end
@@ -52,7 +52,8 @@ defmodule NimbleOptions.MixProject do
     [
       main: "NimbleOptions",
       source_ref: "v#{@version}",
-      source_url: @repo_url
+      source_url: @repo_url,
+      extras: ["CHANGELOG.md": [title: "Changelog"]]
     ]
   end
 end

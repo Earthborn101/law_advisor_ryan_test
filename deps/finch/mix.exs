@@ -2,7 +2,7 @@ defmodule Finch.MixProject do
   use Mix.Project
 
   @name "Finch"
-  @version "0.13.0"
+  @version "0.14.0"
   @repo_url "https://github.com/sneako/finch"
 
   def project do
@@ -36,7 +36,7 @@ defmodule Finch.MixProject do
       {:mint, "~> 1.3"},
       {:castore, "~> 0.1"},
       {:nimble_pool, "~> 0.2.6"},
-      {:nimble_options, "~> 0.4.0"},
+      {:nimble_options, "~> 0.4"},
       {:telemetry, "~> 0.4 or ~> 1.0"},
       {:mime, "~> 1.0 or ~> 2.0"},
       {:ex_doc, "~> 0.28", only: :dev, runtime: false},

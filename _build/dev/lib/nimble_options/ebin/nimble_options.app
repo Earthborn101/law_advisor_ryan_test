@@ -4,4 +4,4 @@
               {modules,['Elixir.NimbleOptions','Elixir.NimbleOptions.Docs',
                         'Elixir.NimbleOptions.ValidationError']},
               {registered,[]},
-              {vsn,"0.4.0"}]}.
+              {vsn,"0.5.1"}]}.
