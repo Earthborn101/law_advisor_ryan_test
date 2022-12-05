@@ -21,9 +21,12 @@ defmodule LawAdvisorTestWeb.Router do
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", LawAdvisorTestWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", LawAdvisorTestWeb do
+    pipe_through :api
+
+    post "/todos", TodosController, :index
+    post "/todos/create", TodosController, :create
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:law_advisor_test, :dev_routes) do
