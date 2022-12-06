@@ -1,7 +1,6 @@
 {application,law_advisor_test,
     [{compile_env,
-         [{law_advisor_test,['Elixir.LawAdvisorTestWeb.Gettext'],error},
-          {law_advisor_test,[dev_routes],{ok,true}}]},
+         [{law_advisor_test,['Elixir.LawAdvisorTestWeb.Gettext'],error}]},
      {applications,
          [kernel,stdlib,elixir,logger,runtime_tools,phoenix,phoenix_ecto,
           ecto_sql,postgrex,phoenix_html,phoenix_live_reload,

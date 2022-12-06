@@ -23,4 +23,10 @@ defmodule LawAdvisorTest.Todos.Tasks do
   def create_task(params) do
     Task.changeset(%Task{}, params) |> Repo.insert()
   end
+
+  def count_task_by_user_id(user_id) do
+    query = from(t in Task, where: t.user_id == ^user_id)
+
+    Repo.aggregate(query, :count)
+  end
 end

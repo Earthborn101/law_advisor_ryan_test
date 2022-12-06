@@ -8,6 +8,8 @@ defmodule LawAdvisorTest.Repo.Migrations.CreateUsersTable do
 
       timestamps()
     end
+
+    create(unique_index(:users, [:username]))
   end
 
   def down do

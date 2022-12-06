@@ -20,13 +20,6 @@ defmodule LawAdvisorTestWeb.SessionController do
     end
   end
 
-  def delete(conn, _params, _) do
-    conn
-    |> delete_session(:current_user)
-    |> put_status(200)
-    |> render("logout.json", message: "Logout successfully")
-  end
-
   def auth_error(conn, _, _opts) do
     conn
     |> put_status(:forbidden)

@@ -2,7 +2,8 @@ defmodule LawAdvisorTest.Todos.Task do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias LawAdvisorTest.Accounts.User
+  alias LawAdvisorTest.Accounts.Users
+  alias LawAdvisorTest.Todos.Tasks
 
   schema "tasks" do
     field :description, :string
@@ -26,5 +27,13 @@ defmodule LawAdvisorTest.Todos.Task do
       :user_id
     ])
     |> validate_required([:title, :description])
+    |> put_order()
+  end
+
+  defp put_order(changeset) do
+    user_id = fetch_field!(changeset, :user_id)
+
+    changeset
+    |> put_change(:order, Tasks.count_task_by_user_id(user_id) + 1)
   end
 end

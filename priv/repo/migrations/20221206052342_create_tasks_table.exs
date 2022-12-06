@@ -11,8 +11,6 @@ defmodule LawAdvisorTest.Repo.Migrations.CreateTasksTable do
 
       timestamps()
     end
-
-    create unique_index(:tasks, [:user_id])
   end
 
   def down do
