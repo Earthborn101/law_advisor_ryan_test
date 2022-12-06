@@ -12,20 +12,25 @@ defmodule LawAdvisorTestWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
-  end
 
-  scope "/", LawAdvisorTestWeb do
-    pipe_through :browser
+    plug(
+      Guardian.Plug.Pipeline,
+      error_handler: LawAdvisorTestWeb.SessionController,
+      module: LawAdvisorTestWeb.Guardian
+    )
 
-    get "/", PageController, :home
+    plug(Guardian.Plug.VerifyHeader, realm: "Token")
+    plug(Guardian.Plug.LoadResource, allow_blank: true)
   end
 
   # Other scopes may use custom stacks.
   scope "/api", LawAdvisorTestWeb do
     pipe_through :api
 
-    post "/todos", TodosController, :index
-    post "/todos/create", TodosController, :create
+    post "/login", SessionController, :create
+    post "/logout", SessionController, :delete
+
+    post "/tasks/create", TasksController, :create
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

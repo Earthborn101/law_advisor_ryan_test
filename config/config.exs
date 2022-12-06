@@ -62,3 +62,8 @@ config :phoenix, :json_library, Jason
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
+
+# Config Add guardian
+config :law_advisor_test, LawAdvisorTestWeb.Guardian,
+  issuer: "LawAdvisorTest",
+  secret_key: "7QzJT25X1hl11RZjJrWiz5tDrUYjm9eWfCUc/HOLZVlulCXFTLBQClhaVS+49joO"
