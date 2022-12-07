@@ -30,7 +30,9 @@ defmodule LawAdvisorTestWeb.Router do
     post "/login", SessionController, :create
 
     scope "/tasks" do
+      post "/", TasksController, :index
       post "/create", TasksController, :create
+      post "/reorder", TasksController, :reorder_tasks
     end
   end
 end

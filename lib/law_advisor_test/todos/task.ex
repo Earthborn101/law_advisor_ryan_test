@@ -8,7 +8,7 @@ defmodule LawAdvisorTest.Todos.Task do
   schema "tasks" do
     field :description, :string
     field :order, :integer
-    field :status, :boolean
+    field :status, :boolean, default: false
     field :title, :string
     belongs_to :user, User
 
@@ -16,24 +16,38 @@ defmodule LawAdvisorTest.Todos.Task do
   end
 
   @doc false
-  def changeset(task, attrs) do
+  def changeset(task, attrs \\ %{}) do
     task
     |> cast(attrs, [
       :description,
       :order,
       :status,
       :title,
-      :title,
       :user_id
     ])
-    |> validate_required([:title, :description])
-    |> put_order()
+    |> validate_required([:title, :description, :user_id])
+    |> validate_length(:title, max: 25)
   end
 
-  defp put_order(changeset) do
+  @doc false
+  def changeset_reorder(task, attrs \\ %{}) do
+    task
+    |> cast(attrs, [:order, :user_id])
+    |> validate_required([:order, :user_id])
+    |> validate_order(task)
+  end
+
+  defp validate_order(%{valid?: true} = changeset, task) do
+    order = fetch_field!(changeset, :order)
     user_id = fetch_field!(changeset, :user_id)
 
-    changeset
-    |> put_change(:order, Tasks.count_task_by_user_id(user_id) + 1)
+    with true <- Tasks.count_task_by(user_id: user_id) >= order,
+         true <- task.order !== order,
+         true <- order > 0 do
+      changeset
+    else
+      false ->
+        changeset |> add_error(:order, "Invalid order")
+    end
   end
 end

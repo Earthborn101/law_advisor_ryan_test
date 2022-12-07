@@ -14,9 +14,11 @@ defmodule LawAdvisorTest.Accounts.Users do
 
   ## Examples
 
-      iex> create_user(%{"username" => "username1", "password" => "password1"})
-      %User{username: "username1", password: encrypted}
+      iex> create_user(%{"username" => "username1", "password" => "12345"})
+      {:ok, %User{}}
 
+      iex> create_user(%{"username" => "username1", "password" => "123456"})
+      {:error, changeset}
   """
   def create_user(params) do
     User.changeset(%User{}, params)
