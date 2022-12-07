@@ -9,7 +9,7 @@ defmodule LawAdvisorTestWeb.TasksJSON do
     end
   end
 
-  def create(%{task: task}), do: remove_struct(task)
+  def create_or_update(%{task: task}), do: remove_struct(task)
 
   def error(%{error: error}) do
     %{error_message: error}

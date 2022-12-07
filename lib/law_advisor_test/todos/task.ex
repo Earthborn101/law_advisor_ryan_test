@@ -30,6 +30,18 @@ defmodule LawAdvisorTest.Todos.Task do
   end
 
   @doc false
+  def changeset_update(task, attrs \\ %{}) do
+    task
+    |> cast(attrs, [
+      :description,
+      :order,
+      :status,
+      :title
+    ])
+    |> validate_length(:title, max: 25)
+  end
+
+  @doc false
   def changeset_reorder(task, attrs \\ %{}) do
     task
     |> cast(attrs, [:order, :user_id])

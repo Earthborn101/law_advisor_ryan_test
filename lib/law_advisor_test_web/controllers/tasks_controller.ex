@@ -15,10 +15,34 @@ defmodule LawAdvisorTestWeb.TasksController do
 
     case Tasks.create_task(params) do
       {:ok, task} ->
-        render(conn, "create.json", task: task)
+        render(conn, "create_or_update.json", task: task)
 
       {:error, _} ->
         render(conn, "error.json", error: "Invalid Task")
+    end
+  end
+
+  def update(conn, params, current_user) do
+    params = Map.put(params, "user_id", current_user.id)
+
+    case Tasks.update_task(params) do
+      {:ok, task} ->
+        render(conn, "create_or_update.json", task: task)
+
+      {:error, _} ->
+        render(conn, "error.json", error: "Invalid Task Parameters")
+    end
+  end
+
+  def delete(conn, params, current_user) do
+    params = Map.put(params, "user_id", current_user.id)
+
+    case Tasks.delete_task(params) do
+      {:ok, %{tasks: tasks}} ->
+        render(conn, "list_tasks.json", tasks: tasks)
+
+      {:error, _} ->
+        render(conn, "error.json", error: "Invalid Task Parameters")
     end
   end
 

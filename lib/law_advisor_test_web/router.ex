@@ -32,6 +32,8 @@ defmodule LawAdvisorTestWeb.Router do
     scope "/tasks" do
       post "/", TasksController, :index
       post "/create", TasksController, :create
+      post "/update", TasksController, :update
+      post "/delete", TasksController, :delete
       post "/reorder", TasksController, :reorder_tasks
     end
   end
