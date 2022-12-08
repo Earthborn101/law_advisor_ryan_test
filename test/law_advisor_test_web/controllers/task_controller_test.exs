@@ -31,13 +31,15 @@ defmodule LawAdvisorTestWeb.TaskControllerTest do
       args = %{
         description: Faker.Lorem.paragraph(2),
         task_id: update_task.id,
-        title: Faker.StarWars.En.planet()
+        title: Faker.StarWars.En.planet(),
+        status: true
       }
 
       response = json_response(post(conn, "/api/tasks/update", args), 200)
 
       assert response["description"] == args.description
       assert response["title"] == args.title
+      assert response["status"]
     end
 
     test "Reorder Task order", %{conn: conn, tasks: tasks} do

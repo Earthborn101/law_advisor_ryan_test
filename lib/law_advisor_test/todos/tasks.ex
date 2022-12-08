@@ -83,7 +83,6 @@ defmodule LawAdvisorTest.Todos.Tasks do
       iex> delete_task(%{"task_id" => 2})
       {:error, changeset}
   """
-
   def delete_task(%{"task_id" => task_id} = attrs) do
     task = get_task_by(id: task_id, user_id: attrs["user_id"])
 
@@ -112,22 +111,19 @@ defmodule LawAdvisorTest.Todos.Tasks do
   defp validate_delete_task_attrs(task), do: {:ok, task}
 
   defp update_order_task_after_delete(attrs, task) do
-    order = task.order
-
     ordered_rows_subquery =
       from(t in Task,
-        where: t.user_id == ^attrs["user_id"] and t.order >= ^order,
+        where: t.user_id == ^attrs["user_id"] and t.order >= ^task.order,
         select: %{
           id: t.id,
           order: t.order - 1
         }
       )
 
-    update_query =
-      from t in Task,
-        join: new_order in subquery(ordered_rows_subquery),
-        on: new_order.id == t.id,
-        update: [set: [order: new_order.order]]
+    from t in Task,
+      join: new_order in subquery(ordered_rows_subquery),
+      on: new_order.id == t.id,
+      update: [set: [order: new_order.order]]
   end
 
   @doc """
@@ -166,8 +162,6 @@ defmodule LawAdvisorTest.Todos.Tasks do
     |> Repo.transaction()
   end
 
-  defp validate_task_attrs(_attrs, nil), do: {:error, "Invalid Task"}
-
   defp validate_reorder_task_attrs(attrs, task) do
     case Task.changeset_reorder(task, attrs) do
       %Ecto.Changeset{valid?: true} = changeset ->
@@ -191,11 +185,10 @@ defmodule LawAdvisorTest.Todos.Tasks do
         attrs["user_id"]
       )
 
-    update_query =
-      from t in Task,
-        join: new_order in subquery(ordered_rows_subquery),
-        on: new_order.id == t.id,
-        update: [set: [order: new_order.order]]
+    from t in Task,
+      join: new_order in subquery(ordered_rows_subquery),
+      on: new_order.id == t.id,
+      update: [set: [order: new_order.order]]
   end
 
   defp ordered_rows_subquery(:gt, new_order, old_order, task_id, user_id) do
